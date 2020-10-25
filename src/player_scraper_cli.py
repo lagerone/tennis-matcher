@@ -8,6 +8,7 @@ from bs4.element import Tag
 
 def _create_player_dict(name: str, url: str, elo_points: int):
     return {
+        "id": url.replace('https://', '').split('/')[6],
         "name": name,
         "url": url,
         "elo_points": elo_points

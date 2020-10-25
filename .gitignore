@@ -17,3 +17,5 @@ venv_deploy
 **/.deploy_venv/**
 *.orig
 players.json
+player_preferences.json
+matchups.json
