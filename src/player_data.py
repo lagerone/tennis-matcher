@@ -15,7 +15,7 @@ def _create_player_dict(name: str, url: str, elo_points: int):
     }
 
 
-def _scrape_player_data():
+def fetch_player_data() -> List[Dict]:
     page = requests.get(
         'https://www.luckylosertennis.com/ATL/ATLstegen/public/rankings/view')
 
@@ -46,9 +46,4 @@ def _scrape_player_data():
             str(player_data[3]).replace(' ', '')))
         players.append(p)
 
-    with open('players.json', 'w') as outfile:
-        json.dump(obj={"players": players}, indent=2, fp=outfile)
-
-
-if __name__ == "__main__":
-    _scrape_player_data()
+    return players
