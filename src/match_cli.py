@@ -7,13 +7,13 @@ from matching.games import StableRoommates
 from player_data import fetch_player_data
 from player_preferences import calculate_player_preferences
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def _load_player_pool() -> List[str]:
-    with open('playerpool.json') as json_file:
+    with open("playerpool.json") as json_file:
         json_data: Dict = json.load(json_file)
-        return json_data.get('playerpool')
+        return json_data.get("playerpool", [])
 
 
 def main():
@@ -22,11 +22,13 @@ def main():
 
     logging.info("Calculating player preferences...")
     player_preferences = calculate_player_preferences(
-        all_players_data=player_data, player_pool=_load_player_pool(), match_history_days=90)
+        all_players_data=player_data,
+        player_pool=_load_player_pool(),
+        match_history_days=90,
+    )
 
     logging.info("Calculating matchups...")
-    game = StableRoommates.create_from_dictionary(
-        player_prefs=player_preferences)
+    game = StableRoommates.create_from_dictionary(player_prefs=player_preferences)
     result = game.solve()
 
     matched_players: List[str] = []
@@ -35,12 +37,12 @@ def main():
         if player in matched_players:
             continue
         matched_players += [player, opponent]
-        matches.append(f'{player} vs {opponent}')
+        matches.append(f"{player} vs {opponent}")
 
-    with open('matchup-result.txt', 'w') as file:
-        file.write('\n'.join(matches))
+    with open("matchup-result.txt", "w") as file:
+        file.write("\n".join(matches))
 
-    logging.info(f'Done! Matchup result written to "matchup-result.txt".')
+    logging.info('Done! Matchup result written to "matchup-result.txt".')
 
 
 if __name__ == "__main__":
