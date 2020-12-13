@@ -4,21 +4,7 @@ Creates tennis matches for Stegen at ATL Lund. Uses data from [luckylosertennis.
 
 It uses [Irvin's solution](https://www.sciencedirect.com/science/article/abs/pii/0196677485900331) to the [stable roommates problem](https://en.wikipedia.org/wiki/Stable_roommates_problem) from the [python matching package](https://github.com/daffidwilde/matching) to create the matchups.
 
-To calculate each players preferences a weight for all opponents are calculated by which the opponents are ordered.
-
-```py
-# file player_preferences.py
-
-def _calculate_opponent_weight(player_elo: int, opponent_elo: int, matches_count: int):
-    """
-    The `matches_count` is the number of matches the player
-    has played against the opponent in the last 90 days.
-    """
-    abs_elo_diff = abs(player_elo - opponent_elo)
-    if matches_count == 0:
-        return abs_elo_diff
-    return abs(int(round(abs_elo_diff * matches_count)))
-```
+To calculate each players preferences a weight for all opponents are calculated (see `src/opponent_weight.py`) by which the opponents are ordered.
 
 ## Install
 

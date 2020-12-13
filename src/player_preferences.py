@@ -1,5 +1,4 @@
-import logging
-from datetime import datetime
+from datetime import date
 from operator import itemgetter
 from typing import Dict, List
 
@@ -7,26 +6,36 @@ import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from current_date_provider import get_date_today
+from opponent_weight import calculate_opponent_weight
+
 
 class TennisException(Exception):
     """Raised when something sucks"""
 
 
-def _create_opponent_history_dict(date: str, opponent: str) -> Dict[str, str]:
-    return {"date": date, "opponent": opponent}
+class MatchHistory:
+    def __init__(self, match_date: date, opponent_name: str) -> None:
+        self.match_date: date = match_date
+        self.opponent_name: str = opponent_name
+
+
+def _create_opponent_history_dict(date: str, opponent: str) -> MatchHistory:
+    return MatchHistory(match_date=_create_date(date), opponent_name=opponent)
 
 
 def _create_date(input: str):
-    logging.debug(f"create_date input = {input}")
     s = input.split("-")
-    return datetime(int(s[0]), int(s[1]), int(s[2]))
+    return date(int(s[0]), int(s[1]), int(s[2]))
 
 
-def _get_opponents_played_count(
+def _get_match_history_by_opponent(
     player: Dict, match_history_days: int
-) -> Dict[str, int]:
+) -> Dict[str, List[MatchHistory]]:
     """
-    :returns kvp of opponent name and number of times played
+    Returns:
+        Dict[str, List[MatchHistory]]: kvp of opponent name and a list of
+        matches against that opponent
     """
     url = f'https://www.luckylosertennis.com/ATL/ATLstegen/public/players/matches/{player["id"]}/1'
     page = requests.get(url)
@@ -46,7 +55,7 @@ def _get_opponents_played_count(
     del raw_match_history[-1]
     del raw_match_history[0]
 
-    matches: List[Dict[str, str]] = []
+    matches: List[MatchHistory] = []
 
     for raw_match in raw_match_history:
         opponent_name = raw_match[2] if raw_match[3] == player["name"] else raw_match[3]
@@ -54,17 +63,16 @@ def _get_opponents_played_count(
             _create_opponent_history_dict(date=raw_match[1], opponent=opponent_name)
         )
 
-    opponents_played_count_dict: Dict = {}
+    opponent_matches: Dict[str, List[MatchHistory]] = {}
     for match in matches:
-        time_since_match = datetime.now() - _create_date(match["date"])
+        time_since_match = get_date_today() - match.match_date
         if time_since_match.days >= match_history_days:
             break
-        if opponents_played_count_dict.get(match["opponent"]):
-            opponents_played_count_dict[match["opponent"]] += 1
-        else:
-            opponents_played_count_dict[match["opponent"]] = 1
+        match_history = opponent_matches.get(match.opponent_name, [])
+        match_history.append(match)
+        opponent_matches[match.opponent_name] = match_history
 
-    return opponents_played_count_dict
+    return opponent_matches
 
 
 def _add_weight_to_player_data(
@@ -76,7 +84,7 @@ def _add_weight_to_player_data(
 
     opponents = [player for player in player_data if player["name"] != player_name]
 
-    history = _get_opponents_played_count(
+    history = _get_match_history_by_opponent(
         player=current_player, match_history_days=match_history_days
     )
     for opponent in opponents:
@@ -87,20 +95,25 @@ def _add_weight_to_player_data(
             raise TennisException(
                 f'Opponent "{opponent["name"]}" not found in player data.'
             )
-        current_opponent_match_count = history.get(current_opponent["name"], 0)
-        current_opponent["weight"] = _calculate_opponent_weight(
-            current_player["elo_points"],
-            current_opponent["elo_points"],
-            current_opponent_match_count,
+        previous_matches = history.get(current_opponent["name"], [])
+        current_opponent_latest_match = (
+            sorted(
+                history.get(current_opponent["name"], []),
+                key=lambda x: x.match_date,
+                reverse=True,
+            )[0]
+            if previous_matches
+            else None
+        )
+        current_opponent["weight"] = calculate_opponent_weight(
+            player_elo=current_player["elo_points"],
+            opponent_elo=current_opponent["elo_points"],
+            matches_count=len(history.get(current_opponent["name"], [])),
+            latest_match_date=current_opponent_latest_match.match_date
+            if current_opponent_latest_match
+            else None,
         )
     return opponents
-
-
-def _calculate_opponent_weight(player_elo: int, opponent_elo: int, matches_count: int):
-    abs_elo_diff = abs(player_elo - opponent_elo)
-    if matches_count == 0:
-        return abs_elo_diff
-    return abs(int(round(abs_elo_diff * matches_count)))
 
 
 def _create_player_preferences(
