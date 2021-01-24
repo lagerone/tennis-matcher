@@ -1,20 +1,22 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-
-def _create_player_dict(name: str, url: str, elo_points: int):
-    return {
-        "id": url.replace("https://", "").split("/")[6],
-        "name": name,
-        "url": url,
-        "elo_points": elo_points,
-    }
+from models import Player
 
 
-def fetch_player_data() -> List[Dict]:
+def _create_player(name: str, url: str, elo_points: int) -> Player:
+    return Player(
+        id=url.replace("https://", "").split("/")[6],
+        name=name,
+        url=url,
+        elo_points=elo_points,
+    )
+
+
+def fetch_player_data() -> List[Player]:
     page = requests.get(
         "https://www.luckylosertennis.com/ATL/ATLstegen/public/rankings/view"
     )
@@ -39,10 +41,10 @@ def fetch_player_data() -> List[Dict]:
     del raw_player_data[-1]
     del raw_player_data[0]
 
-    players: List[Dict] = []
+    players: List[Player] = []
 
     for player_data in raw_player_data:
-        p = _create_player_dict(
+        p = _create_player(
             name=player_data[2],
             url=player_data[1],
             elo_points=int(str(player_data[3]).replace(" ", "")),

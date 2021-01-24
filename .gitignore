@@ -18,3 +18,4 @@ venv_deploy
 *.orig
 playerpool.json
 matchup-result.txt
+name-map.json

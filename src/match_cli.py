@@ -37,7 +37,7 @@ def main():
         if player in matched_players:
             continue
         matched_players += [player, opponent]
-        matches.append(f"{player} vs {opponent}")
+        matches.append(f"{player} VS {opponent}")
 
     with open("matchup-result.txt", "w") as file:
         file.write("\n".join(matches))
