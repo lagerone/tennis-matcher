@@ -114,7 +114,6 @@ def _create_opponents_from_players(
         current_opponent_weight = calculate_opponent_weight(
             player_elo=current_player.elo_points,
             opponent_elo=current_opponent.elo_points,
-            matches_count=len(opponent_history.get(current_opponent.name, [])),
             latest_match_date=current_opponent_latest_match.match_date
             if current_opponent_latest_match
             else None,
