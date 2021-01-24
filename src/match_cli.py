@@ -6,7 +6,7 @@ from matching.games import StableRoommates
 from matching.matchings import SingleMatching
 
 from models import Player
-from player_data import fetch_player_data
+from player_data import fetch_opponent_stats, fetch_player_data
 from player_preferences import calculate_player_preferences
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,10 +18,13 @@ def _load_player_pool() -> List[str]:
         return json_data.get("playerpool", [])
 
 
-def _create_match_row(court_number: int, player1: Player, player2: Player) -> str:
+def _create_match_row(
+    court_number: int, player1: Player, player2: Player, stats: str
+) -> str:
     return (
         f"Court {court_number}: "
-        f"{player1.name} {player1.elo_points}pts VS {player2.name} {player2.elo_points}pts"
+        f"{player1.name} {player1.elo_points}pts VS {player2.name} {player2.elo_points}pts "
+        f"=> {stats}"
     )
 
 
@@ -65,7 +68,12 @@ def main():
         matched_players += [player_name, opponent_name]
         match_rows.append(
             _create_match_row(
-                court_number=court_number, player1=player, player2=opponent
+                court_number=court_number,
+                player1=player,
+                player2=opponent,
+                stats=fetch_opponent_stats(
+                    player_id=player.id, opponent_id=opponent.id
+                ),
             )
         )
         court_number += 1

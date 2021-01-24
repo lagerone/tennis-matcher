@@ -16,6 +16,38 @@ def _create_player(name: str, url: str, elo_points: int) -> Player:
     )
 
 
+def fetch_opponent_stats(player_id: str, opponent_id: str) -> str:
+    url = f"https://www.luckylosertennis.com/ATL/ATLstegen/public/players/view/{player_id}"
+    page = requests.get(url)
+
+    soup = BeautifulSoup(page.content, "html.parser")
+    table = soup.find(name="table", class_="table")
+    rows: List[Tag] = table.find_all("tr")
+
+    raw_player_data = []
+    for row in rows:
+        cols = row.find_all("td")
+        stripped_cols: List[str] = []
+        for c in cols:
+            anchor: Optional[Tag] = c.find(name="a")
+            if anchor:
+                stripped_cols.append(anchor.get("href"))
+            else:
+                stripped_cols.append(c.text.strip())
+        raw_player_data.append([element for element in stripped_cols if element])
+
+    del raw_player_data[-1]
+    del raw_player_data[0]
+
+    opponent_row = next(
+        (row for row in raw_player_data if str(row[0]).endswith(f"/{opponent_id}")),
+        None,
+    )
+    if not opponent_row:
+        return "never played"
+    return f"{opponent_row[1]}-{opponent_row[2]}-{opponent_row[3]}"
+
+
 def fetch_player_data() -> List[Player]:
     page = requests.get(
         "https://www.luckylosertennis.com/ATL/ATLstegen/public/rankings/view"
