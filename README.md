@@ -19,7 +19,7 @@ To calculate each players preferences a weight for all opponents are calculated 
 
 ## Usage
 
-1. Create a file named `playerpool.json` in the project root. Add current players to the player pool. The name of the players must be their exact name at [luckylosertennis.com](https://www.luckylosertennis.com/).
+1. Create a file named `playerpool.json` in the project root. Add current players to the player pool. The name of the players must be their exact name at [luckylosertennis.com](https://www.luckylosertennis.com/ATL/ATLstegen/public/).
 
    ```json
    {

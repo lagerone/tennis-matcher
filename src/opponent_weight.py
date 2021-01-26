@@ -22,11 +22,11 @@ def calculate_opponent_weight(
     abs_elo_diff = abs(player_elo - opponent_elo)
     if latest_match_date:
         if _is_date_within_margin(input_date=latest_match_date, margin_days=7):
-            return abs_elo_diff * 3
+            return abs_elo_diff + 100
         if _is_date_within_margin(input_date=latest_match_date, margin_days=14):
-            return abs_elo_diff * 2
+            return abs_elo_diff + 75
         if _is_date_within_margin(input_date=latest_match_date, margin_days=35):
-            return abs_elo_diff * 1.5
+            return abs_elo_diff + 25
     return abs_elo_diff
 
 
