@@ -9,12 +9,10 @@ To calculate each players preferences a weight for all opponents are calculated 
 ## Install
 
 1. Clone this repository
-2. Create a virtual environment, e.g. `python3 -m venv venv`
-3. Activate the virtual environment, e.g. `source venv/bin/activate`
-4. Install dependencies:
+2. Run the setup script:
+
    ```bash
-   pip install -r src/dev_requirements.txt
-   pip install -r src/requirements.txt
+   ./setup.sh
    ```
 
 ## Usage
@@ -32,10 +30,10 @@ To calculate each players preferences a weight for all opponents are calculated 
    }
    ```
 
-2. Create the matchups:
+2. Run the program to create the matchups:
 
    ```bash
-   python src/match_cli.py
+   ./run.sh
    ```
 
 The matchups will be written to a file named `matchup-result.txt`.
