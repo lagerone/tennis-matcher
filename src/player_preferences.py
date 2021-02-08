@@ -56,7 +56,6 @@ def _get_match_history_by_opponent(
             stripped_cols.append(c.text.strip())
         raw_match_history.append([element for element in stripped_cols if element])
 
-    del raw_match_history[-1]
     del raw_match_history[0]
 
     matches: List[OpponentMatchHistory] = []

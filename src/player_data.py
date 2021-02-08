@@ -36,7 +36,6 @@ def fetch_opponent_stats(player_id: str, opponent_id: str) -> str:
                 stripped_cols.append(c.text.strip())
         raw_player_data.append([element for element in stripped_cols if element])
 
-    del raw_player_data[-1]
     del raw_player_data[0]
 
     opponent_row = next(
@@ -70,6 +69,7 @@ def fetch_player_data() -> List[Player]:
             stripped_cols.append(c.text.strip())
         raw_player_data.append([element for element in stripped_cols if element])
 
+    # delete table header and footer
     del raw_player_data[-1]
     del raw_player_data[0]
 
