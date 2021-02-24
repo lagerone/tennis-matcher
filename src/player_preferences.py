@@ -163,6 +163,16 @@ def calculate_player_preferences(
         key=lambda p: p.elo_points,
         reverse=True,
     )
+
+    for player_name in player_pool:
+        player_exists = next(
+            (p for p in all_players_data if p.name == player_name), None
+        )
+        if not player_exists:
+            raise TennisException(
+                f'Player name "{player_name}" could not be found in the rankings.'
+            )
+
     for player in ordered_player_pool_data:
         player_preferences[player.name] = _create_player_preferences(
             player_name=player.name,
