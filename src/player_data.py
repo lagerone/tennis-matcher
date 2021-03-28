@@ -22,6 +22,10 @@ def fetch_opponent_stats(player_id: str, opponent_id: str) -> str:
 
     soup = BeautifulSoup(page.content, "html.parser")
     table = soup.find(name="table", class_="table")
+
+    if not table:
+        return "never played"
+
     rows: List[Tag] = table.find_all("tr")
 
     raw_player_data = []

@@ -110,6 +110,7 @@ def _create_opponents_from_players(
             if previous_matches
             else None
         )
+
         current_opponent_weight = calculate_opponent_weight(
             player_elo=current_player.elo_points,
             opponent_elo=current_opponent.elo_points,
@@ -144,6 +145,24 @@ def _create_player_preferences(
     return player_prefs
 
 
+def _normalize_player_pool(player_pool: List[Player]) -> List[Player]:
+    sorted_pp_asc = sorted(
+        player_pool,
+        key=lambda p: p.elo_points,
+        reverse=False,
+    )
+    result: List[Player] = []
+    previous_elo = 1000
+    for p in sorted_pp_asc:
+        normalized_elo = previous_elo + 10
+        result.append(
+            Player(id=p.id, name=p.name, elo_points=normalized_elo, url=p.url)
+        )
+        previous_elo = normalized_elo
+
+    return sorted(result, key=lambda p: p.elo_points, reverse=True)
+
+
 def calculate_player_preferences(
     all_players_data: List[Player], player_pool: List[str], match_history_days: int
 ) -> Dict[str, List[str]]:
@@ -176,7 +195,7 @@ def calculate_player_preferences(
     for player in ordered_player_pool_data:
         player_preferences[player.name] = _create_player_preferences(
             player_name=player.name,
-            player_data=ordered_player_pool_data,
+            player_data=_normalize_player_pool(ordered_player_pool_data),
             match_history_days=match_history_days,
         )
 

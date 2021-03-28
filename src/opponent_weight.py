@@ -5,9 +5,7 @@ from current_date_provider import get_date_today
 
 
 def calculate_opponent_weight(
-    player_elo: int,
-    opponent_elo: int,
-    latest_match_date: Optional[date] = None,
+    player_elo: int, opponent_elo: int, latest_match_date: Optional[date] = None
 ):
     """Calculates weight for opponent, where lower weight means a better match.
 
