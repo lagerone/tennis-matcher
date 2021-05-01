@@ -30,17 +30,17 @@ class TestCalculateOpponentWeight(TestCase):
         result1 = calculate_opponent_weight(
             player_elo=player_elo,
             opponent_elo=opponent_elo,
-            latest_match_date=latest_match_date_within_7_days,
+            previous_match_dates=latest_match_date_within_7_days,
         )
         result2 = calculate_opponent_weight(
             player_elo=player_elo,
             opponent_elo=opponent_elo,
-            latest_match_date=latest_match_date_within_14_days,
+            previous_match_dates=latest_match_date_within_14_days,
         )
         result3 = calculate_opponent_weight(
             player_elo=player_elo,
             opponent_elo=opponent_elo,
-            latest_match_date=latest_match_date_within_35_days,
+            previous_match_dates=latest_match_date_within_35_days,
         )
         result4 = calculate_opponent_weight(
             player_elo=player_elo, opponent_elo=opponent_elo
@@ -66,12 +66,12 @@ class TestCalculateOpponentWeight(TestCase):
         result1 = calculate_opponent_weight(
             player_elo=player_elo,
             opponent_elo=900,
-            latest_match_date=latest_match_date_within_7_days,
+            previous_match_dates=latest_match_date_within_7_days,
         )
         result2 = calculate_opponent_weight(
             player_elo=player_elo,
             opponent_elo=900,
-            latest_match_date=latest_match_date_within_14_days,
+            previous_match_dates=latest_match_date_within_14_days,
         )
         result3 = calculate_opponent_weight(player_elo=player_elo, opponent_elo=650)
 

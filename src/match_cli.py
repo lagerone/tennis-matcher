@@ -1,12 +1,17 @@
 import json
 import logging
+from datetime import date
 from typing import Dict, List, Optional
 
 from matching.games import StableRoommates
 from matching.matchings import SingleMatching
 
 from models import Player
-from player_data import fetch_opponent_stats, fetch_player_data
+from player_data import (
+    fetch_opponent_stats,
+    fetch_player_data,
+    fetch_player_match_history,
+)
 from player_preferences import calculate_player_preferences
 
 logging.basicConfig(level=logging.DEBUG)
@@ -19,13 +24,20 @@ def _load_player_pool() -> List[str]:
 
 
 def _create_match_row(
-    court_number: int, player1: Player, player2: Player, stats: str
+    court_number: int,
+    player1: Player,
+    player2: Player,
+    stats: str,
+    previous_match_date: Optional[date],
 ) -> str:
-    return (
+    result = (
         f"Court {court_number}: "
         f"{player1.name} {player1.elo_points}pts VS {player2.name} {player2.elo_points}pts "
-        f"=> {stats}"
+        f"=> {stats} "
     )
+    if previous_match_date:
+        result = f"{result} ({previous_match_date})"
+    return result
 
 
 def _find_player_by_name(players: List[Player], player_name: str) -> Optional[Player]:
@@ -38,7 +50,7 @@ def main():
 
     logging.info("Calculating player preferences...")
     player_preferences = calculate_player_preferences(
-        all_players_data=player_data,
+        all_players=player_data,
         player_pool=_load_player_pool(),
         match_history_days=90,
     )
@@ -66,6 +78,19 @@ def main():
                 f'Could not find opponent "{opponent_name}" in player data.'
             )
         matched_players += [player_name, opponent_name]
+        player_history = fetch_player_match_history(
+            player=player, match_history_days=31
+        )
+        opponent_previous_match_dates = sorted(
+            player_history.get(opponent.name, []),
+            key=lambda x: x.match_date,
+            reverse=True,
+        )
+        previous_match_date = (
+            opponent_previous_match_dates[0].match_date
+            if opponent_previous_match_dates
+            else None
+        )
         match_rows.append(
             _create_match_row(
                 court_number=court_number,
@@ -74,6 +99,7 @@ def main():
                 stats=fetch_opponent_stats(
                     player_id=player.id, opponent_id=opponent.id
                 ),
+                previous_match_date=previous_match_date,
             )
         )
         court_number += 1
