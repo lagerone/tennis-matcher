@@ -1,38 +1,10 @@
-from abc import ABC, abstractmethod, abstractproperty
-from typing import Dict, List, NamedTuple
+from typing import Dict, List
 
-from models import Player
 from opponent_weight import calculate_opponent_weight
 from player_data import fetch_player_match_history
 
-
-class TennisException(Exception):
-    """Raised when something sucks"""
-
-
-class Opponent(NamedTuple):
-    name: str
-    weight: int
-
-
-# def _write_to_json_file(filename: str, data: Dict) -> None:
-#     with open(filename, "w", encoding="utf-8") as file:
-#         json.dump(data, file, ensure_ascii=False, indent=2, default=str)
-
-
-# Stateful props:
-# - normalized_and_sorted_player_pool
-# - player_preferences
-
-
-class PlayerPreferencesStrategy(ABC):
-    """PlayerPreferencesStrategy"""
-
-    @abstractmethod
-    def create_player_preferences(
-        self, match_history_days: int
-    ) -> Dict[str, List[str]]:
-        """create_player_preferences"""
+from models import OpponentMatchHistory, Player
+from strategies.models import Opponent, PlayerPreferencesStrategy, TennisException
 
 
 class NormalizedStrategy(PlayerPreferencesStrategy):
@@ -54,7 +26,7 @@ class NormalizedStrategy(PlayerPreferencesStrategy):
 
     def _create_opponents_from_players(
         self, player_name: str, player_data: List[Player], match_history_days: int
-    ) -> List[Opponent]:
+    ) -> List[OpponentMatchHistory]:
         current_player = next((p for p in player_data if p.name == player_name), None)
         if not current_player:
             raise TennisException(f'No player found named "{player_name}".')
@@ -128,23 +100,3 @@ class NormalizedStrategy(PlayerPreferencesStrategy):
             previous_elo = normalized_elo
 
         return sorted(result, key=lambda p: p.elo_points, reverse=True)
-
-
-def calculate_player_preferences(
-    all_players: List[Player], player_pool: List[str], match_history_days: int
-) -> Dict[str, List[str]]:
-    """Creates a dictionary of player names and a ordered list of preferred opponent names.
-
-    Args:
-        all_players (List[Player]): All players available
-        player_pool (List[str]): List of player names in the active player pool
-        match_history_days (int):
-
-    Returns:
-        Dict[str, List[str]]:
-    """
-    strategy = NormalizedStrategy(
-        player_pool_names=player_pool, all_players=all_players
-    )
-
-    return strategy.create_player_preferences(match_history_days=90)
